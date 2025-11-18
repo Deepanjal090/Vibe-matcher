@@ -6,9 +6,8 @@ Vibe Matcher Prototype (Hybrid Version)
 Compatible with VS Code + Python 3.11.6 virtual environment
 """
 
-# =========================================================
+
 # 1. IMPORTS & SETUP
-# =========================================================
 import os, time
 import numpy as np
 import pandas as pd
@@ -23,9 +22,8 @@ load_dotenv()
 from openai import OpenAI
 from fastembed import TextEmbedding
 
-# =========================================================
+
 # 2. CONFIGURATION
-# =========================================================
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 USE_OPENAI = bool(OPENAI_API_KEY)
 
@@ -40,9 +38,8 @@ else:
 LOCAL_MODEL = "BAAI/bge-small-en-v1.5"
 embedder = TextEmbedding(model_name=LOCAL_MODEL)
 
-# =========================================================
+
 # 3. DATA PREPARATION
-# =========================================================
 products = [
     {"name": "Black Oversized Hoodie", "desc": "dark mysterious streetwear cozy cold weather", "vibes": ["streetwear", "dark", "cozy"]},
     {"name": "Pink Crop Top", "desc": "cute soft pastel girl summer vibes aesthetic", "vibes": ["girly", "summer", "aesthetic"]},
@@ -58,9 +55,7 @@ df = pd.DataFrame(products)
 print("\n🛍️ Product catalog:")
 print(df[["name", "vibes"]])
 
-# =========================================================
 # 4. EMBEDDING FUNCTIONS
-# =========================================================
 def get_openai_embedding(text):
     """Use OpenAI embeddings if available and quota allows."""
     try:
@@ -81,17 +76,15 @@ def get_embedding(text):
     else:
         return get_fastembed_embedding(text)
 
-# =========================================================
+
 # 5. GENERATE PRODUCT EMBEDDINGS
-# =========================================================
 print("\n⚙️ Generating embeddings for products...")
 embeddings = [get_embedding(desc) for desc in df["desc"]]
 df["embedding"] = embeddings
 print("✅ All embeddings generated successfully!")
 
-# =========================================================
+
 # 6. COSINE SIMILARITY SEARCH
-# =========================================================
 def search_vibe_matches(query, top_k=3):
     """Find top-k matching products for a vibe query."""
     query_emb = get_embedding(query)
@@ -107,9 +100,7 @@ def search_vibe_matches(query, top_k=3):
 
     return top_matches[["name", "desc", "vibes", "score"]], fallback
 
-# =========================================================
 # 7. TEST & EVALUATION
-# =========================================================
 queries = [
     "energetic urban chic",
     "dark mysterious street look",
@@ -130,9 +121,7 @@ for q in queries:
 
 print(f"\n📊 Average latency: {np.mean(times):.2f}s | Good matches (>0.7): {good_count}")
 
-# =========================================================
 # 8. VISUALIZATION
-# =========================================================
 plt.bar(range(len(times)), times)
 plt.xticks(range(len(times)), [f"Q{i+1}" for i in range(len(times))])
 plt.xlabel("Query #")
@@ -141,9 +130,8 @@ plt.title("Vibe Matcher Query Latency (Hybrid Mode)")
 plt.tight_layout()
 plt.show()
 
-# =========================================================
+
 # 9. REFLECTION
-# =========================================================
 print("\n💡 Reflection:")
 print("- Hybrid embedding pipeline: OpenAI (cloud) + FastEmbed (local fallback).")
 print("- Robust against quota or connectivity errors.")
